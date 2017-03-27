@@ -18,6 +18,8 @@ var getDisplayName = require('./getDisplayName');
  * Convert a react internal instance to a sanitized data object.
  */
 function getData(element: Object): DataType {
+  var userMappers = window.__REACT_DEVTOOLS_USER_MAPPERS__;
+
   var children = null;
   var props = null;
   var state = null;
@@ -42,9 +44,9 @@ function getData(element: Object): DataType {
   } else if (element._renderedComponent) {
     nodeType = 'NativeWrapper';
     children = [element._renderedComponent];
-    props = element._instance.props;
-    state = element._instance.state;
-    context = element._instance.context;
+    props = userMappers ? userMappers.mapProps(element._instance.props) : element._instance.props;
+    state = userMappers ? userMappers.mapState(element._instance.state) : element._instance.state;
+    context = userMappers ? userMappers.mapContext(element._instance.context) : element._instance.context;
     if (context && Object.keys(context).length === 0) {
       context = null;
     }
@@ -58,7 +60,7 @@ function getData(element: Object): DataType {
   }
 
   if (!props && element._currentElement && element._currentElement.props) {
-    props = element._currentElement.props;
+    props = userMappers ? userMappers.mapProps(element._currentElement.props) : element._currentElement.props;
   }
 
   // != used deliberately here to catch undefined and null
